@@ -61,7 +61,7 @@ class AnimalShelter:
             if query is not None and update_data is not None:
                 # Use $set operator to update fields
                 result = self.collection.update_many(query, {"$set": update_data})
-                return result.modified_count  # Return number of documents modified
+                return result.modified_count  # return number of documents modified
             else:
                 raise ValueError("Both query and update_data parameters are required")
         except Exception as e:
