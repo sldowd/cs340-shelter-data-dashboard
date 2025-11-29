@@ -79,3 +79,12 @@ class AnimalShelter:
         except Exception as e:
             print(f"Error deleting documents: {e}")
             return 0
+
+    # close method - manually closes db connection
+    def close(self):
+        try:
+            self.client.close()
+            print("Client closed")
+            return True
+        except Exception as e:
+            print(f"Error closing client: {e}")
