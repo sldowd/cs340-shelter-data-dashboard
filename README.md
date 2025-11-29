@@ -104,30 +104,30 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 3. **Install dependencies**
 ```bash
-pip install pymongo pandas plotly dash jupyter-dash dash-leaflet matplotlib numpy
+pip install requirements.txt
 ```
 
 4. **Import dataset into MongoDB**
 ```bash
-mongoimport --type=csv --db=AAC --collection=animals --headerline --file=datasets/aac_shelter_outcomes.csv
+mongoimport --db=aac --collection=animals --file=animals.json
 ```
 
 5. **Create database user**
 ```javascript
 // In mongosh:
-use AAC
+use aac
 db.createUser({
-  user: "aacuser",
-  pwd: "SNHU1234",
-  roles: [{role: "readWrite", db: "AAC"}]
+  user: "username",
+  pwd: "password",
+  roles: [{role: "readWrite", db: "aac"}]
 })
 ```
 
 6. **Configure authentication**
 Update credentials in `animal_shelter.py` or use environment variables:
 ```python
-username = os.getenv('DB_USERNAME', 'aacuser')
-password = os.getenv('DB_PASSWORD', 'SNHU1234')
+username = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWORD')
 ```
 
 ### Running the Application
