@@ -61,7 +61,7 @@ GraziosoSilvare/
 ├── .env                               # Environment variables (credentials)
 ├── .gitignore                         # Git ignore file
 ├── animals.json                       # Sample data or export
-├── crudModule.py                      # CRUD module
+├── animal_shelter.py                      # CRUD module
 ├── ModuleFourTestScript.ipynb         # Test script for CRUD operations
 └── README.md
 ```

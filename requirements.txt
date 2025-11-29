@@ -1,0 +1,5 @@
+jupyter==1.1.1
+numpy==2.3.5
+pandas==2.3.3
+pymongo==4.15.4
+python-dotenv==1.2.1
