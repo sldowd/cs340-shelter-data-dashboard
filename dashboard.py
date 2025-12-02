@@ -5,6 +5,11 @@ import pandas as pd
 import dash_leaflet as dl
 import base64
 
+import importlib
+import animal_shelter
+
+# Reload the module
+importlib.reload(animal_shelter)
 # import controller
 from animal_shelter import AnimalShelter
 
@@ -26,13 +31,14 @@ app.layout = html.Div([
     html.Hr(),
     dbc.Container([
         dbc.Label('Shelter Data'),
-        dash_table.DataTable(data=df.to_dict('records'),columns=[{'name' : i, 'id' : i} for i in df.columns],
-                         selectable=True, deletable=False, page_action='native', page_size=15, page_current=0),
+        dash_table.DataTable(data=df.to_dict('records'),
+                             columns=[{'name' : i, 'id' : i, 'deletable' : False, 'selectable' : True} for i in df.columns],
+                            page_action='native', page_size=15, page_current=0),
 
 
     ])
 ])
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
 

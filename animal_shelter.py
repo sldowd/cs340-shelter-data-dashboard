@@ -8,13 +8,13 @@ class AnimalShelter:
         load_dotenv()
 
         # Use username and password if passed as parameters
-        if username & password:
-            USER = username
-            PASSWORD = password
+        if username and password:
+            self.USER = username
+            self.PASSWORD = password
         # If not passed as parameters use username and password from .env
         else:
-            USER = os.getenv("MONGO_USER")
-            PASSWORD = os.getenv("MONGO_PASSWORD")
+            self.USER = os.getenv("MONGO_USER")
+            self.PASSWORD = os.getenv("MONGO_PASSWORD")
 
         # create connection variables
 
@@ -24,7 +24,7 @@ class AnimalShelter:
         COLLECTION = os.getenv("MONGO_COLLECTION")
 
         # create connection string
-        uri = f"mongodb://{USER}:{PASSWORD}@{HOST}:{PORT}"
+        uri = f"mongodb://{self.USER}:{self.PASSWORD}@{HOST}:{PORT}"
 
 
         try:
