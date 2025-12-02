@@ -3,13 +3,21 @@ from dotenv import load_dotenv
 import os
 
 class AnimalShelter:
-    def __init__(self):
+    def __init__(self, username=None, password=None):
         # load environment variables
         load_dotenv()
 
+        # Use username and password if passed as parameters
+        if username & password:
+            USER = username
+            PASSWORD = password
+        # If not passed as parameters use username and password from .env
+        else:
+            USER = os.getenv("MONGO_USER")
+            PASSWORD = os.getenv("MONGO_PASSWORD")
+
         # create connection variables
-        USER = os.getenv("MONGO_USER")
-        PASSWORD = os.getenv("MONGO_PASSWORD")
+
         HOST = os.getenv("MONGO_HOST", "localhost")
         PORT = os.getenv("MONGO_PORT", "27017")
         DB = os.getenv("MONGO_DATABASE")
@@ -81,6 +89,7 @@ class AnimalShelter:
             return 0
 
     # close method - manually closes db connection
+    # TODO: Refactor for automatic connection cleanup
     def close(self):
         try:
             self.client.close()
