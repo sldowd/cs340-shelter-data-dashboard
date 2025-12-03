@@ -29,20 +29,33 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 app.layout = html.Div([
     html.Center(html.B(html.H1('CS-340 Module 6 Dashboard'))),
     html.Hr(),
+    # container for DataTable
     dbc.Container([
         dbc.Label('Shelter Data'),
         # dropdown menu with rescue options to filter data displayed in table, placeholder text instructs user
         dcc.Dropdown(['Water Rescue', 'Mountain Rescue', 'Disaster Rescue', 'Reset'],
                      placeholder='Select Rescue Type to Filter Data', id='dropdown-filter'),
+        # data table built from data from database--selectable rows, native pagination, 10 rows per page
+        # cells left-aligned with max width, table scrolls horizontally
         dash_table.DataTable(data=df.to_dict('records'),
                             columns=[{'name' : i, 'id' : i, 'deletable' : False, 'selectable' : True} for i in df.columns],
-                            row_selectable='single', page_action='native', page_size=15, page_current=0, id='shelter-table',
+                            row_selectable='single', page_action='native', page_size=10, page_current=0, id='shelter-table',
                             style_cell={'textAlign' : 'left', 'height': 'auto',
                             'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                            'whiteSpace': 'normal'}, style_table={'overflowX': 'auto'})
+                            'whiteSpace': 'normal'}, style_table={'overflowX': 'auto'}, selected_rows=[0]),
     ]),
     html.Br(),
-    html.Div(id='map-div'),
+    # container for graph and map -- wrapped in a row for optimized layout
+    dbc.Container([
+        dbc.Row([
+            dbc.Col(
+                [dcc.Graph(id='pie-chart')], xs=12, md=6
+            ),
+            dbc.Col(
+                [html.Div(id='map-div')], xs=12, md=6
+            )
+        ])
+    ], fluid=True),
     html.Br(),
     html.Br(),
 
@@ -84,6 +97,22 @@ def update_table(dropdown_filter):
     # return filtered dataframe to data property of DataTable
     return filtered_df.to_dict('records')
 
+# callback to display breed percentages in pie chart
+@app.callback(
+    Output('pie-chart', 'figure'),
+    [Input('shelter-table', 'derived_virtual_data')]
+)
+def update_pie_chart(viewData):
+    if viewData is None:
+        return []
+    # pie dataframe from shelter-table data
+    pie_df = pd.DataFrame.from_records(viewData)
+    # filter to display top 8 breeds -- otherwise full df pie chart looks like nonsense
+    top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
+    top_breeds.columns = ['breed', 'count']
+    fig = px.pie(top_breeds, names='breed', values='count')
+    return fig
+
 @app.callback(
     Output('map-div', "children"),
     [Input('shelter-table', "derived_virtual_data"),
@@ -103,7 +132,7 @@ def update_map(viewData, index):
 
     # Austin TX is at [30.75,-97.48]
     return [
-        dl.Map(style={'width': '1000px', 'height': '500px'}, center=[30.75, -97.48], zoom=10, children=[
+        dl.Map(style={'width': '500px', 'height': '500px'}, center=[30.75, -97.48], zoom=10, children=[
             dl.TileLayer(id="base-layer-id"),
             # Marker with tool tip and popup
             # Column 13 and 14 define the grid-coordinates for the map
