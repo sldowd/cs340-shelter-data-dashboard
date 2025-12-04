@@ -64,7 +64,8 @@ app.layout = html.Div([
 # callback to update datatable by filtering data based on dropdown selection
 @app.callback(
     Output('shelter-table', 'data'),
-    [Input('dropdown-filter', 'value')]
+    Output('shelter-table', 'selected_rows'),
+    Input('dropdown-filter', 'value')
 )
 def update_table(dropdown_filter):
     # create query for each dropdown filter based on given Grazioso Salvare criteria
@@ -95,7 +96,7 @@ def update_table(dropdown_filter):
     filtered_df = pd.DataFrame.from_records(db.read(query))
     filtered_df.drop(columns=['_id'], inplace=True)
     # return filtered dataframe to data property of DataTable
-    return filtered_df.to_dict('records')
+    return filtered_df.to_dict('records'), [0]
 
 # callback to display breed percentages in pie chart
 @app.callback(
@@ -132,16 +133,18 @@ def update_map(viewData, index):
 
     # Austin TX is at [30.75,-97.48]
     return [
-        dl.Map(style={'width': '500px', 'height': '500px'}, center=[30.75, -97.48], zoom=10, children=[
+        dl.Map(style={'width': '100%', 'height': '500px'},
+               center=[dff.iloc[row, 13], dff.iloc[row, 14]], # changed map center from Austin to selected row loc
+               zoom=10, children=[
             dl.TileLayer(id="base-layer-id"),
             # Marker with tool tip and popup
             # Column 13 and 14 define the grid-coordinates for the map
-            # Column 4 defines the breed for the animal
-            # Column 9 defines the name of the animal
             dl.Marker(position=[dff.iloc[row, 13], dff.iloc[row, 14]], children=[
+                # Column 4 defines the breed for the animal
                 dl.Tooltip(dff.iloc[row, 4]),
                 dl.Popup([
                     html.H1("Animal Name"),
+                    # Column 9 defines the name of the animal
                     html.P(dff.iloc[row, 9])
                 ])
             ])
