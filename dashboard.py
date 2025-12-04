@@ -1,3 +1,5 @@
+
+
 from dash import Dash, html, Input, Output, dcc, dash_table
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -23,26 +25,85 @@ df = pd.DataFrame.from_records(db.read({}))
 df.drop(columns=['_id'], inplace=True)
 
 # initialize dash app
-app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
+app = Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
+# encode logo to base64 string
+binary_img = open('Grazioso Salvare Logo.png', 'rb').read()
+encoded_img = base64.b64encode(binary_img)
 
-app.layout = html.Div([
+app.layout = dbc.Container([
     html.Center(html.B(html.H1('CS-340 Module 6 Dashboard'))),
+    html.Br(),
+    html.Br(),
+    dbc.Row([
+        dbc.Col([
+            html.A([
+                html.Img(
+                    src='data:image/png;base64,{}'.format(encoded_img.decode()),
+                    style={
+                        'height': '300px',
+                        'width': 'auto',
+                        'objectFit': 'contain'
+                    }
+                )
+            ], href='https://www.snhu.edu', target='_blank')
+        ], xs=12, md=6, className='d-flex align-items-center justify-content-center'),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H4('Welcome to the Grazioso Salvare Dashboard', className='card-title'),
+                    html.P([
+                        "This dashboard helps identify rescue dog candidates from Austin-area animal shelters. "
+                        "Use the filters below to search for dogs matching specific rescue profiles: ",
+                        html.Br(),
+                        html.Strong("Water Rescue"), ", ",
+                        html.Strong("Mountain/Wilderness Rescue"), ", or ",
+                        html.Strong("Disaster/Individual Tracking"), ". "
+                        "Each rescue type has preferred breed, age, and sex criteria optimized for training success.",
+                        html.Br(),
+                        html.Br(),
+                        "This dashboard was built by SarahD <3"
+                    ], className='card-text')
+                ])
+            ])
+        ], style={'height':'100%'}, xs=12, md=6, className='d-flex align-items-center mb-4'),
+    ]),
     html.Hr(),
     # container for DataTable
     dbc.Container([
-        dbc.Label('Shelter Data'),
-        # dropdown menu with rescue options to filter data displayed in table, placeholder text instructs user
-        dcc.Dropdown(['Water Rescue', 'Mountain Rescue', 'Disaster Rescue', 'Reset'],
-                     placeholder='Select Rescue Type to Filter Data', id='dropdown-filter'),
+        html.H3('Shelter Data'),
+        dbc.Card([
+           dbc.CardBody([
+               html.H5('Filter by Rescue Type', className='card-title'),
+                # dropdown menu with rescue options to filter data displayed in table, placeholder text instructs user
+                dcc.Dropdown(['Water Rescue', 'Mountain Rescue', 'Disaster Rescue', 'Reset'],
+                            placeholder='Select Rescue Type', id='dropdown-filter'),
+           ]),
+        ]),
         # data table built from data from database--selectable rows, native pagination, 10 rows per page
-        # cells left-aligned with max width, table scrolls horizontally
+        # cells left-aligned with max width, table scrolls horizontally, sorting enabled
         dash_table.DataTable(data=df.to_dict('records'),
                             columns=[{'name' : i, 'id' : i, 'deletable' : False, 'selectable' : True} for i in df.columns],
-                            row_selectable='single', page_action='native', page_size=10, page_current=0, id='shelter-table',
-                            style_cell={'textAlign' : 'left', 'height': 'auto',
-                            'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                            'whiteSpace': 'normal'}, style_table={'overflowX': 'auto'}, selected_rows=[0]),
+                            row_selectable='single',
+                            page_action='native',
+                            sort_action='native',
+                            page_size=10,
+                            page_current=0,
+                            id='shelter-table',
+                            style_cell={'textAlign' : 'left',
+                                        'height': 'auto',
+                                        'minWidth': '90px',
+                                        'width': '180px',
+                                        'maxWidth': '180px',
+                                        'textOverflow' : 'ellipsis',
+                                        },
+                            style_table={'overflowX': 'auto'},
+                            style_data={'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'},
+                            style_header={'color': 'white',
+                                          'backgroundColor': 'rgb(201, 52, 27)',
+                                          'fontWeight': 'bold',
+                                          'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'},
+                            selected_rows=[0]),
     ]),
     html.Br(),
     # container for graph and map -- wrapped in a row for optimized layout
