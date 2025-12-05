@@ -83,26 +83,37 @@ app.layout = dbc.Container([
         # data table built from data from database--selectable rows, native pagination, 10 rows per page
         # cells left-aligned with max width, table scrolls horizontally, sorting enabled
         dash_table.DataTable(data=df.to_dict('records'),
-                            columns=[{'name' : i, 'id' : i, 'deletable' : False, 'selectable' : True} for i in df.columns],
+                            columns=[
+                                {
+                                    'name' : i.replace('_', ' ').title(), # transform from snake case to title case
+                                    'id' : i,
+                                    'deletable' : False,
+                                    'selectable' : True
+                                } for i in df.columns],
                             row_selectable='single',
                             page_action='native',
                             sort_action='native',
                             page_size=10,
                             page_current=0,
                             id='shelter-table',
-                            style_cell={'textAlign' : 'left',
-                                        'height': 'auto',
-                                        'minWidth': '90px',
-                                        'width': '180px',
-                                        'maxWidth': '180px',
-                                        'textOverflow' : 'ellipsis',
-                                        },
+                            style_cell=
+                                {
+                                 'textAlign' : 'left',
+                                'height': 'auto',
+                                'minWidth': '90px',
+                                'width': '180px',
+                                'maxWidth': '180px',
+                                'textOverflow' : 'ellipsis',
+                            },
                             style_table={'overflowX': 'auto'},
                             style_data={'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'},
-                            style_header={'color': 'white',
-                                          'backgroundColor': 'rgb(201, 52, 27)',
-                                          'fontWeight': 'bold',
-                                          'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'},
+                            style_header=
+                                {
+                                    'color': 'white',
+                                    'backgroundColor': 'rgb(201, 52, 27)',
+                                    'fontWeight': 'bold',
+                                    'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                                },
                             selected_rows=[0]),
     ]),
     html.Br(),
@@ -113,7 +124,9 @@ app.layout = dbc.Container([
                 [dcc.Graph(id='pie-chart')], xs=12, md=6
             ),
             dbc.Col(
-                [html.Div(id='map-div')], xs=12, md=6
+                [html.H5('Selected Animal Location', className='mb-2'),
+                 html.Div(id='map-div')
+                 ], xs=12, md=6
             )
         ])
     ], fluid=True),
@@ -172,7 +185,20 @@ def update_pie_chart(viewData):
     # filter to display top 8 breeds -- otherwise full df pie chart looks like nonsense
     top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
     top_breeds.columns = ['breed', 'count']
-    fig = px.pie(top_breeds, names='breed', values='count')
+    fig = px.pie(
+        top_breeds,
+        names='breed',
+        values='count',
+        title='Breed Distribution',
+        color_discrete_sequence=px.colors.sequential.RdBu
+    )
+    # Customize Tooltip
+    fig.update_traces(
+        hovertemplate='<b>%{label}</b><br>' +
+                      'Dogs Available: %{value}<br>' +
+                      'Percentage: %{percent}' +
+                      '<extra></extra>'
+    )
     return fig
 
 @app.callback(
