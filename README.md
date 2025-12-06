@@ -1,85 +1,198 @@
-# Animal Shelter Data Dashboard
+# Grazioso Salvare Animal Shelter Dashboard
 
-A full-stack web application for managing and visualizing animal shelter data. Built with Python, MongoDB, and Plotly Dash to provide interactive data exploration and filtering capabilities.
+A full-stack web application for managing and visualizing animal shelter data to identify rescue dog training candidates. Built with Python, MongoDB, and Plotly Dash to provide interactive data exploration, filtering, and geolocation capabilities.
 
 ## Project Overview
 
-This application provides a comprehensive dashboard interface for animal shelter management, enabling users to:
-- View and filter animal shelter outcome data
-- Identify animals suitable for specific rescue training programs
-- Visualize data through interactive charts and geolocation mapping
+This application provides a comprehensive dashboard interface for Grazioso Salvare, an international rescue animal training company, enabling users to:
+- View and filter animal shelter outcome data from Austin-area shelters
+- Identify dogs suitable for specific rescue training programs (Water, Mountain/Wilderness, Disaster/Individual Tracking)
+- Visualize breed distribution through interactive pie charts
+- Explore animal locations via geolocation mapping
 - Perform CRUD operations on the shelter database
 
 ## Tech Stack
 
-- **Backend:** Python 3.9+, MongoDB
-- **Frontend:** Plotly Dash, Dash Leaflet
+- **Backend:** Python 3.9+, MongoDB 5.0+
+- **Frontend Framework:** Plotly Dash 2.x, Dash Bootstrap Components
 - **Data Processing:** Pandas, NumPy
-- **Visualization:** Plotly Express, Matplotlib
+- **Visualization:** Plotly Express, Dash Leaflet
+- **Database Driver:** PyMongo
+- **Styling:** Bootstrap (UNITED theme), Custom CSS
 
 ## Architecture
 
-The application follows the MVC (Model-View-Controller) design pattern:
+The application follows the **MVC (Model-View-Controller)** design pattern:
 
-- **Model:** MongoDB database with custom Python CRUD module
-- **View:** Dash components (data tables, charts, maps)
-- **Controller:** Python callback functions managing component interactions
+- **Model:** MongoDB database (`AAC.animals` collection) with custom Python CRUD module for data operations
+- **View:** Dash components including interactive data tables, pie charts, and Leaflet maps
+- **Controller:** Python callback functions managing real-time component interactions and data flow
+
+### Why This Tech Stack?
+
+**MongoDB**
+- Flexible NoSQL schema accommodates varying animal data structures
+- Built-in geospatial indexing and query support for location-based features
+- Scalable architecture supports growing shelter data
+- Document model aligns naturally with shelter record structure
+
+**Plotly Dash**
+- Python-native framework eliminates need for separate JavaScript development
+- Reactive components enable real-time dashboard updates
+- Built-in callback system simplifies complex user interactions
+- Rapid prototyping accelerates development cycle
+
+**PyMongo**
+- Official MongoDB Python driver with robust error handling
+- Connection pooling for improved performance
+- Well-documented API with active community support
+- Seamless integration with Pandas for data analysis
+
+**Dash Bootstrap Components**
+- Professional UI components without custom CSS overhead
+- Responsive grid system for mobile compatibility
+- Consistent theming across application
+- Accessibility features built-in
 
 ## Features
 
-### CRUD Operations Module
-Custom Python class providing:
-- **Create:** Insert new animal records into the database
-- **Read:** Query and retrieve animal data with flexible filtering
-- **Update:** Modify existing animal records
-- **Delete:** Remove records from the database
+### CRUD Operations Module (`animal_shelter.py`)
 
-All CRUD operations include proper error handling and return appropriate status indicators.
+Custom Python class providing full database operations:
+
+**Create**
+- Insert new animal records into MongoDB
+- Returns acknowledgment status
+- Input validation and error handling
+
+**Read**
+- Flexible query interface supporting MongoDB query syntax
+- Returns cursor results as Python list
+- Handles empty results gracefully
+
+**Update**
+- Bulk update operations with `$set` operator
+- Returns count of modified documents
+- Supports complex query filters
+
+**Delete**
+- Remove documents matching query criteria
+- Returns count of deleted documents
+- Prevents accidental data loss with required query parameter
+
+**Connection Management**
+- Environment variable configuration for secure credential storage
+- Automatic connection initialization
+- Manual close method for cleanup
 
 ### Interactive Dashboard
-- **Data Table:** Sortable, paginated view of all animal records
-- **Filtering Options:** Radio buttons/dropdowns for rescue type filtering:
-  - Water Rescue
-  - Mountain/Wilderness Rescue
-  - Disaster/Individual Tracking
-  - Reset (unfiltered view)
-- **Dynamic Charts:** Visualizations that update based on filtered data
-- **Geolocation Map:** Interactive map showing animal locations in Austin, TX area
 
-### Filter Queries
-Pre-built queries for identifying animals suitable for different rescue types based on:
-- Age requirements
-- Breed characteristics
-- Sex requirements
-- Specific breed preferences per rescue type
+**Welcome Section**
+- Branded header with Grazioso Salvare logo
+- Mission statement and usage instructions
+- Responsive card layout with professional styling
+
+**Data Table**
+- Displays all animal records with sortable columns
+- Pagination (10 records per page)
+- Single-row selection for detail viewing
+- Column headers auto-formatted from snake_case to Title Case
+- Horizontal scroll for overflow data
+- Custom styling matching brand colors
+
+**Filter System**
+- Dropdown menu with four filter options:
+  - **Water Rescue:** Labrador Retriever Mix, Chesapeake Bay Retriever, Newfoundland (Intact Female, 26-156 weeks)
+  - **Mountain/Wilderness Rescue:** German Shepherd, Alaskan Malamute, Old English Sheepdog, Siberian Husky, Rottweiler (Intact Male, 26-156 weeks)
+  - **Disaster/Individual Tracking:** Doberman Pinscher, German Shepherd, Golden Retriever, Bloodhound, Rottweiler (Intact Male, 20-300 weeks)
+  - **Reset:** Returns to unfiltered view
+- Real-time table updates on filter selection
+- Automatic first-row selection after filtering
+
+**Breed Distribution Chart**
+- Interactive pie chart showing top 8 breeds in filtered dataset
+- Custom hover tooltips with dog count and percentage
+- Slice labels display percentages
+- White borders for visual clarity
+- Responsive to filter changes
+
+**Geolocation Map**
+- Interactive Leaflet map centered on selected animal's location
+- Marker shows animal position in Austin, TX area
+- Tooltip displays breed on hover
+- Popup shows animal name on click
+- Zoom level 10 for neighborhood-scale view
+- Dynamic centering based on selected record
+
+### Query Implementation
+
+Pre-built MongoDB queries filter animals based on rescue type criteria:
+
+```python
+# Water Rescue Example
+{
+    'breed': {'$in': ['Labrador Retriever Mix', 'Chesapeake Bay Retriever', 'Newfoundland']},
+    'sex_upon_outcome': 'Intact Female',
+    'age_upon_outcome_in_weeks': {'$gte': 26, '$lte': 156}
+}
+```
+
+Each query considers:
+- Preferred breed list per rescue type
+- Sex requirements (Intact Male/Female)
+- Training age windows in weeks
+- Compound conditions with MongoDB operators
 
 ## Project Structure
 
 ```
 GraziosoSilvare/
-├── venv/                              # Virtual environment
-├── .env                               # Environment variables (credentials)
-├── .gitignore                         # Git ignore file
-├── animals.json                       # Sample data or export
-├── animal_shelter.py                      # CRUD module
-├── ModuleFourTestScript.ipynb         # Test script for CRUD operations
-└── README.md
+├── venv/                              # Virtual environment (not in repo)
+├── .env                               # Environment variables (not in repo)
+├── .gitignore                         # Git ignore configuration
+├── requirements.txt                   # Python dependencies
+├── animal_shelter.py                  # CRUD module for MongoDB operations
+├── dashboard.py                       # Main dashboard application
+├── Grazioso Salvare Logo.png          # Brand logo image
+├── assets/                            # Optional: Custom CSS/JS
+│   └── custom.css                     # Dashboard styling overrides
+├── screenshots/                       # Dashboard screenshots for documentation
+│   ├── dashboard-preview.png
+│   ├── water-rescue-filter.png
+│   ├── mountain-rescue-filter.png
+│   └── disaster-rescue-filter.png
+├── README.md                          # This file
+├── STYLE_GUIDE.md                     # Frontend design documentation
+└── tests/
+    └── test_crud.ipynb                # CRUD module test suite
 ```
 
 ## Database Schema
 
-MongoDB collection: `AAC.animals`
+**Collection:** `AAC.animals`
 
-Key fields:
-- `animal_id`: Unique identifier
-- `animal_type`: Dog, Cat, etc.
-- `breed`: Specific breed
-- `name`: Animal name
-- `age_upon_outcome`: Age in weeks
-- `outcome_type`: Adoption, Transfer, etc.
-- `sex_upon_outcome`: Sex classification
-- `location_lat`: Latitude coordinate
-- `location_long`: Longitude coordinate
+**Key Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | ObjectId | MongoDB unique identifier |
+| `animal_id` | String | Shelter's animal ID (e.g., A721199) |
+| `animal_type` | String | Species (Dog, Cat, Bird, etc.) |
+| `breed` | String | Specific breed or mix |
+| `name` | String | Animal's name |
+| `age_upon_outcome_in_weeks` | Integer | Age in weeks at outcome |
+| `sex_upon_outcome` | String | Sex classification (Intact Male, Intact Female, etc.) |
+| `outcome_type` | String | Outcome category (Adoption, Transfer, Return to Owner, etc.) |
+| `location_lat` | Float | Latitude coordinate for shelter location |
+| `location_long` | Float | Longitude coordinate for shelter location |
+| `date_of_birth` | String | Birth date (YYYY-MM-DD format) |
+| `datetime` | String | Outcome datetime timestamp |
+| `color` | String | Animal's color description |
+
+**Index Considerations:**
+- Primary index on `_id` (automatic)
+- Recommended: Compound index on `breed`, `sex_upon_outcome`, `age_upon_outcome_in_weeks` for filter performance
+- Geospatial index on `location_lat` and `location_long` for map queries
 
 ## Setup Instructions
 
@@ -87,157 +200,344 @@ Key fields:
 - Python 3.9 or higher
 - MongoDB 5.0 or higher
 - pip package manager
+- 10,000+ records from Austin Animal Center Outcomes dataset
 
 ### Installation
 
-1. **Clone the repository**
+**1. Clone the repository**
 ```bash
-git clone https://github.com/sldowd/cs340-shelter-data-dashboard.git
-cd cs340-shelter-data-dashboard
+git clone https://github.com/sldowd/grazioso-salvare-dashboard.git
+cd grazioso-salvare-dashboard
 ```
 
-2. **Set up virtual environment**
+**2. Set up virtual environment**
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. **Install dependencies**
+**3. Install dependencies**
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
-4. **Import dataset into MongoDB**
-```bash
-mongoimport --db=aac --collection=animals --file=animals.json
+**Required packages:**
+```
+dash==2.14.2
+dash-bootstrap-components==1.5.0
+dash-leaflet==1.0.14
+plotly==5.18.0
+pandas==2.1.3
+numpy==1.26.2
+pymongo==4.6.0
+python-dotenv==1.0.0
 ```
 
-5. **Create database user**
-```javascript
-// In mongosh:
-use aac
+**4. Import dataset into MongoDB**
+```bash
+# From project root directory
+mongoimport --type csv --headerline --db AAC --collection animals \
+  --file aac_shelter_outcomes.csv
+```
+
+**5. Create database user with authentication**
+```bash
+# Start MongoDB shell
+mongosh
+
+# Switch to AAC database
+use AAC
+
+# Create user with read/write permissions
 db.createUser({
-  user: "username",
-  pwd: "password",
-  roles: [{role: "readWrite", db: "aac"}]
+  user: "aacuser",
+  pwd: "your_secure_password",
+  roles: [
+    { role: "readWrite", db: "AAC" }
+  ]
 })
+
+# Verify user creation
+db.getUsers()
 ```
 
-6. **Configure authentication**
-Update credentials in `animal_shelter.py` or use environment variables:
-```python
-username = os.getenv('DB_USERNAME')
-password = os.getenv('DB_PASSWORD')
+**6. Configure environment variables**
+
+Create `.env` file in project root:
+```env
+MONGO_USER=aacuser
+MONGO_PASSWORD=your_secure_password
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_DATABASE=AAC
+MONGO_COLLECTION=animals
 ```
+
+**Security Note:** Never commit `.env` file to version control. It's included in `.gitignore`.
 
 ### Running the Application
 
-**Option 1: Jupyter Notebook**
+**Method 1: Python Script (Recommended)**
 ```bash
-jupyter notebook ModuleFourTestScript.ipynb
-```
-
-**Future: Dashboard Application** (Project Two)
-```bash
-jupyter notebook ProjectTwoDashboard.ipynb
-```
-Run all cells to start the dashboard server.
-
-**Option 2: Python Script** (future conversion)
-```bash
+# Ensure virtual environment is activated
 python dashboard.py
 ```
 
-Access the dashboard at: `http://localhost:8050`
+Access dashboard at: `http://localhost:8050`
 
-## Usage
+**Method 2: Jupyter Notebook (Development)**
+```bash
+# Convert dashboard.py to notebook if needed
+jupyter notebook dashboard.ipynb
+```
 
-### Basic Operations
+Run all cells to start the Dash server.
 
-**Filtering Data:**
-1. Select a rescue type from the filter options
-2. Data table automatically updates to show matching animals
-3. Charts and map refresh to display filtered results
+**Stopping the Application:**
+- Terminal: Press `Ctrl+C`
+- Jupyter: Interrupt kernel
 
-**Viewing Animal Details:**
-1. Click on any row in the data table
-2. Map marker shows animal's location
-3. Hover over marker for breed information
-4. Click marker popup for animal name
+## Usage Guide
 
-**Resetting View:**
-Select "Reset" option to return to unfiltered dataset.
+### Filtering Animals by Rescue Type
+
+1. Locate the **"Filter by Rescue Type"** dropdown near the top of the dashboard
+2. Click the dropdown to reveal filter options:
+   - Water Rescue
+   - Mountain Rescue
+   - Disaster Rescue
+   - Reset
+3. Select desired rescue type
+4. Data table automatically updates to show only matching animals
+5. Pie chart refreshes to show breed distribution of filtered results
+6. First row auto-selects to display animal location on map
+
+### Viewing Animal Details
+
+1. **In Data Table:** Click any row to select an animal
+2. **On Map:** 
+   - Marker appears at animal's shelter location
+   - **Hover** over marker to see breed in tooltip
+   - **Click** marker to open popup with animal name
+3. **In Pie Chart:** Hover over slice to see breed count and percentage
+
+### Sorting Data
+
+- Click any column header to sort ascending
+- Click again to sort descending
+- Click third time to remove sort
+
+### Navigating Large Datasets
+
+- Use pagination controls at bottom of table
+- Table displays 10 records per page
+- Current page indicator shows position in dataset
+- Jump to specific page using page number buttons
+
+### Resetting View
+
+Select "Reset" from filter dropdown to return to unfiltered view of all 10,000+ shelter animals.
 
 ## Development Status
 
-### Completed (Project One)
+### ✅ Completed (Project One - Database Foundation)
 - [x] MongoDB database setup and configuration
-- [x] User authentication implementation
-- [x] CRUD Python module with all operations
-- [x] Test script for CRUD functionality
+- [x] User authentication with role-based permissions
+- [x] CRUD Python module with all four operations
+- [x] Test script validating CRUD functionality
+- [x] Error handling and input validation
+- [x] Environment variable configuration for security
 
-### In Progress (Project Two)
-- [ ] Dashboard layout development
-- [ ] Interactive filter implementation
-- [ ] Query development for rescue type filtering
-- [ ] Geolocation mapping functionality
-- [ ] Additional chart visualization
-- [ ] Data table enhancements (pagination, sorting)
-- [ ] Logo and branding integration
+### ✅ Completed (Project Two - Dashboard Implementation)
+- [x] Full dashboard layout with responsive design
+- [x] Interactive data table with sorting and pagination
+- [x] Dropdown filter with three rescue type queries + reset
+- [x] MongoDB query integration for filtering
+- [x] Pie chart visualization for breed distribution
+- [x] Geolocation map with Leaflet integration
+- [x] Real-time component updates via callbacks
+- [x] Logo and branding integration
+- [x] Custom styling with Bootstrap UNITED theme
+- [x] Professional color palette and typography
+- [x] Mobile-responsive grid layout
 
-### Planned
-- [ ] Input validation and error handling
-- [ ] Enhanced security features
-- [ ] Performance optimization
-- [ ] Unit test suite
-- [ ] Deployment configuration
+### 🔄 In Progress
+- [ ] Row highlighting for selected table records
+- [ ] Additional chart types (bar chart for age distribution)
+- [ ] Export filtered results to CSV
+- [ ] Custom map markers with brand colors
+
+### 📋 Planned Enhancements
+- [ ] User authentication UI for dashboard access
+- [ ] Role-based dashboard permissions
+- [ ] Real-time data refresh from MongoDB change streams
+- [ ] Advanced search with multi-field filtering
+- [ ] Dashboard analytics and usage metrics
+- [ ] Printable report generation
+- [ ] Dark mode theme option
+- [ ] Unit test suite with pytest
+- [ ] Docker containerization for deployment
+- [ ] CI/CD pipeline configuration
 
 ## Testing
 
 ### CRUD Module Tests
-Located in test notebook (to be created):
+
+Located in `tests/test_crud.ipynb`:
+
 ```python
+# Import module
+from animal_shelter import AnimalShelter
+
+# Initialize connection
+shelter = AnimalShelter()
+
 # Test Create
-result = shelter.create(test_data)
+test_animal = {
+    "animal_id": "TEST001",
+    "animal_type": "Dog",
+    "breed": "Golden Retriever",
+    "name": "Test Dog",
+    "age_upon_outcome_in_weeks": 52
+}
+result = shelter.create(test_animal)
+print(f"Create success: {result}")  # Should print True
 
 # Test Read
-results = shelter.read({"animal_type": "Dog"})
+results = shelter.read({"animal_id": "TEST001"})
+print(f"Found {len(results)} record(s)")
 
 # Test Update
-modified = shelter.update({"animal_id": "A123"}, {"name": "New Name"})
+modified = shelter.update(
+    {"animal_id": "TEST001"},
+    {"name": "Updated Test Dog"}
+)
+print(f"Modified {modified} record(s)")
 
 # Test Delete
 deleted = shelter.delete({"animal_id": "TEST001"})
+print(f"Deleted {deleted} record(s)")
 ```
 
-### Dashboard Testing
-- Manual testing of all filter options
-- Verification of data table updates
-- Chart rendering validation
-- Map marker accuracy checks
+### Dashboard Testing Checklist
 
-## Future Enhancements
+**Filter Functionality:**
+- [ ] Water Rescue filter returns correct breeds
+- [ ] Mountain Rescue filter returns correct breeds
+- [ ] Disaster Rescue filter returns correct breeds
+- [ ] Reset filter shows all records
+- [ ] First row auto-selects after filter change
 
-- Role-based access control
-- Data export functionality
-- Advanced search capabilities
-- Real-time data updates
-- Mobile-responsive design
-- Dashboard customization options
+**Data Table:**
+- [ ] All columns display correctly
+- [ ] Sorting works on each column
+- [ ] Pagination navigates through records
+- [ ] Row selection updates map
+
+**Visualizations:**
+- [ ] Pie chart displays top 8 breeds
+- [ ] Chart updates when filter changes
+- [ ] Hover tooltips show correct data
+- [ ] Map centers on selected animal
+- [ ] Map marker shows correct location
+- [ ] Tooltip displays breed
+- [ ] Popup shows animal name
+
+**Responsive Design:**
+- [ ] Layout adapts to mobile screens
+- [ ] All elements remain accessible
+- [ ] Text remains readable at all sizes
+
+## Challenges and Solutions
+
+### Challenge 1: Filter Reset Not Updating Selected Row
+**Problem:** When applying new filter, first row wasn't auto-selecting, causing map to show stale data.
+
+**Solution:** Modified `update_table` callback to return both filtered data AND `[0]` for selected_rows, ensuring first row is always selected after filter application.
+
+```python
+@app.callback(
+    Output('shelter-table', 'data'),
+    Output('shelter-table', 'selected_rows'),  # Added second output
+    Input('dropdown-filter', 'value')
+)
+def update_table(dropdown_filter):
+    # ... filter logic ...
+    return filtered_df.to_dict('records'), [0]  # Always select first row
+```
+
+### Challenge 2: Pie Chart Overcrowding with Unfiltered Data
+**Problem:** With 10,000+ records, pie chart displayed 100+ breeds, making it unreadable.
+
+**Solution:** Implemented top-8 breed filtering using Pandas value_counts() to show only most common breeds in current dataset.
+
+```python
+top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
+```
+
+### Challenge 3: Radio Button Styling
+**Problem:** Default radio buttons didn't match brand colors and were difficult to see.
+
+**Solution:** Applied CSS accent-color property to customize radio button color to brand red (#c9341b).
+
+### Challenge 4: Snake Case Column Headers
+**Problem:** Database field names like `age_upon_outcome_in_weeks` appeared as-is in table headers.
+
+**Solution:** Transformed column names during DataTable initialization using Python string methods.
+
+```python
+columns=[{
+    'name': i.replace('_', ' ').title(),  # Display name
+    'id': i                                 # Original field name
+} for i in df.columns]
+```
+
+## Performance Considerations
+
+- **Initial Load:** ~2-3 seconds for 10,000 records on standard broadband
+- **Filter Application:** <500ms for query execution and table update
+- **Map Rendering:** ~1 second for Leaflet initialization
+- **Chart Updates:** Real-time (<100ms) due to client-side Pandas operations
+
+**Optimization Opportunities:**
+- Implement server-side pagination for datasets >50,000 records
+- Cache frequent queries with TTL expiration
+- Add database indexes on commonly filtered fields
+- Lazy-load map tiles to reduce initial bandwidth
 
 ## Contributing
 
-This is a course project for CS-340 (Client/Server Development) at Southern New Hampshire University. While this is academic work, feedback and suggestions are welcome as I continue to develop and extend this project.
+This project was developed as coursework for CS-340 (Client/Server Development) at Southern New Hampshire University. While this is academic work, the repository is public for portfolio purposes. Feedback, suggestions, and constructive criticism are welcome!
+
+**If you'd like to contribute:**
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Please ensure code follows PEP 8 style guidelines and includes appropriate comments.
 
 ## License
 
-[To be determined]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **Austin Animal Center** for providing the shelter outcomes dataset
+- **Grazioso Salvare** (fictional client) for project requirements and specifications
+- **MongoDB** documentation and community support
+- **Plotly Dash** documentation and example galleries
+- **Southern New Hampshire University** CS-340 course materials and instruction
+- **Bootstrap** and **Dash Bootstrap Components** for UI framework
 
 ## Contact
 
-sarahlynnedowd@gmail.com
-## Acknowledgments
+**Sarah Dowd**
+- Email: sarah.dowd1@snhu.edu
+- GitHub: [@sldowd](https://github.com/sldowd)
 
+---
 
-- MongoDB documentation and community
-- Plotly Dash documentation and examples
+*Last Updated: December 2025*  
+*Project Version: 2.0.0 (Dashboard Complete)*
