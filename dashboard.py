@@ -35,40 +35,40 @@ app.layout = dbc.Container([
     html.Center(html.B(html.H1('CS-340 Module 6 Dashboard'))),
     html.Br(),
     html.Br(),
-    dbc.Row([
-        dbc.Col([
-            html.A([
-                html.Img(
-                    src='data:image/png;base64,{}'.format(encoded_img.decode()),
-                    style={
-                        'height': '300px',
-                        'width': 'auto',
-                        'objectFit': 'contain'
-                    }
-                )
-            ], href='https://www.snhu.edu', target='_blank')
-        ], xs=12, md=6, className='d-flex align-items-center justify-content-center'),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4('Welcome to the Grazioso Salvare Dashboard', className='card-title'),
+    dbc.Card([
+        dbc.CardBody([
+            dbc.Row([
+                dbc.Col([
+                    # Anchor component with requested logo and link
+                    html.A([
+                        html.Img(
+                            src='data:image/png;base64,{}'.format(encoded_img.decode()),
+                            style={
+                                'height': '300px',
+                                'width': 'auto',
+                                'objectFit': 'contain'
+                            }
+                        )
+                    ], href='https://www.snhu.edu', target='_blank')
+                ], xs=12, md=4, className='d-flex align-items-center justify-content-center'),
+                dbc.Col([
+                    html.H2('Welcome to the Grazioso Salvare Dashboard', className='card-title mb-3'),
                     html.P([
                         "This dashboard helps identify rescue dog candidates from Austin-area animal shelters. "
                         "Use the filters below to search for dogs matching specific rescue profiles: ",
                         html.Br(),
                         html.Strong("Water Rescue"), ", ",
                         html.Strong("Mountain/Wilderness Rescue"), ", or ",
-                        html.Strong("Disaster/Individual Tracking"), ". "
+                        html.Strong("Disaster/Individual Tracking"), ". ",
+                        html.Br(),
                         "Each rescue type has preferred breed, age, and sex criteria optimized for training success.",
-                        html.Br(),
-                        html.Br(),
-                        "This dashboard was built by SarahD <3"
-                    ], className='card-text')
-                ])
-            ])
-        ], style={'height':'100%'}, xs=12, md=6, className='d-flex align-items-center mb-4'),
-    ]),
-    html.Hr(),
+                    ], className='card-text mb-3'),
+                    html.P("This dashboard was built by Sarah Dowd 💾",
+                       className='text-muted small')
+                ], xs=12, md=8, className='mb-4'),
+            ], className='mb-4 d-flex align-items-center'),
+        ])
+    ], style={ 'backgroundColor' : '#faf8f5' }, className='shadow-sm mb-4 m-5'),
     # container for DataTable
     dbc.Container([
         html.H3('Shelter Data'),
@@ -77,8 +77,15 @@ app.layout = dbc.Container([
                html.H5('Filter by Rescue Type', className='card-title'),
                 # dropdown menu with rescue options to filter data displayed in table, placeholder text instructs user
                 dcc.Dropdown(['Water Rescue', 'Mountain Rescue', 'Disaster Rescue', 'Reset'],
-                            placeholder='Select Rescue Type', id='dropdown-filter'),
-           ]),
+                            placeholder='Select Rescue Type', id='dropdown-filter',
+                             style=
+                                {
+                                    'color': '#2c3e50',
+                                }),
+           ], style={'color': 'white',
+                    'backgroundColor': '#2c3e50',
+                     'borderRadius': '8px'},
+                className='p-3'),
         ]),
         # data table built from data from database--selectable rows, native pagination, 10 rows per page
         # cells left-aligned with max width, table scrolls horizontally, sorting enabled
@@ -98,22 +105,33 @@ app.layout = dbc.Container([
                             id='shelter-table',
                             style_cell=
                                 {
-                                 'textAlign' : 'left',
-                                'height': 'auto',
-                                'minWidth': '90px',
-                                'width': '180px',
-                                'maxWidth': '180px',
-                                'textOverflow' : 'ellipsis',
-                            },
-                            style_table={'overflowX': 'auto'},
-                            style_data={'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'},
+                                    'textAlign' : 'left',
+                                    'height': 'auto',
+                                    'minWidth': '90px',
+                                    'width': '180px',
+                                    'maxWidth': '180px',
+                                    'textOverflow' : 'ellipsis',
+                                },
+                            style_table=
+                                {
+                                    'overflowX': 'auto',
+                                    'borderRadius': '8px'
+                                },
+                            style_data=
+                                {
+                                    'backgroundColor': '#faf8f5',
+                                    'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                                },
                             style_header=
                                 {
                                     'color': 'white',
-                                    'backgroundColor': 'rgb(201, 52, 27)',
-                                    'fontWeight': 'bold',
+                                    'backgroundColor': '#2c3e50',
                                     'fontFamily': '"Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                                 },
+                                css=[{
+                                        'selector': 'input[type="radio"]:checked',
+                                        'rule': 'accent-color: #c9341b;'
+                                    }],
                             selected_rows=[0]),
     ]),
     html.Br(),
@@ -133,7 +151,7 @@ app.layout = dbc.Container([
     html.Br(),
     html.Br(),
 
-])
+], fluid='true', className='p-4', style={'backgroundColor': '#F2E6E3'})
 
 # callback to update datatable by filtering data based on dropdown selection
 @app.callback(
@@ -179,12 +197,16 @@ def update_table(dropdown_filter):
 )
 def update_pie_chart(viewData):
     if viewData is None:
-        return []
+        return {}
+
     # pie dataframe from shelter-table data
     pie_df = pd.DataFrame.from_records(viewData)
+    if pie_df.empty:
+        return {}
     # filter to display top 8 breeds -- otherwise full df pie chart looks like nonsense
     top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
     top_breeds.columns = ['breed', 'count']
+    # construct pie chart with plotly express
     fig = px.pie(
         top_breeds,
         names='breed',
@@ -192,12 +214,18 @@ def update_pie_chart(viewData):
         title='Breed Distribution',
         color_discrete_sequence=px.colors.sequential.RdBu
     )
-    # Customize Tooltip
+    # customize with update_traces method
     fig.update_traces(
-        hovertemplate='<b>%{label}</b><br>' +
-                      'Dogs Available: %{value}<br>' +
-                      'Percentage: %{percent}' +
-                      '<extra></extra>'
+        hovertemplate='<b>%{label}</b><br>Dogs Available: %{value}<br>Percentage: %{percent}<extra></extra>',
+        textposition='inside',
+        textinfo='percent',
+        marker=dict(line=dict(color='white', width=2))
+    )
+    # match style of page with update_layout method
+    fig.update_layout(
+        paper_bgcolor='#F2E6E3',
+        font={'family' : 'ubuntu'},
+        title_font={'size' : 22}
     )
     return fig
 
