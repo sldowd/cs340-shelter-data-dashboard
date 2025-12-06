@@ -33,8 +33,6 @@ encoded_img = base64.b64encode(binary_img)
 
 app.layout = dbc.Container([
     html.Center(html.B(html.H1('CS-340 Module 6 Dashboard'))),
-    html.Br(),
-    html.Br(),
     dbc.Card([
         dbc.CardBody([
             dbc.Row([
