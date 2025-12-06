@@ -52,7 +52,7 @@ app.layout = dbc.Container([
                     ], href='https://www.snhu.edu', target='_blank')
                 ], xs=12, md=4, className='d-flex align-items-center justify-content-center'),
                 dbc.Col([
-                    html.H2('Welcome to the Grazioso Salvare Dashboard', className='card-title mb-3'),
+                    html.H2('Welcome to the Grazioso Salvare Dashboard', className='card-title mb-3 mt-2'),
                     html.P([
                         "This dashboard helps identify rescue dog candidates from Austin-area animal shelters. "
                         "Use the filters below to search for dogs matching specific rescue profiles: ",
@@ -189,7 +189,7 @@ def update_table(dropdown_filter):
     filtered_df.drop(columns=['_id'], inplace=True)
     # return filtered dataframe to data property of DataTable
     return filtered_df.to_dict('records'), [0]
-
+# TODO callback to highlight selected row in data table
 # callback to display breed percentages in pie chart
 @app.callback(
     Output('pie-chart', 'figure'),
