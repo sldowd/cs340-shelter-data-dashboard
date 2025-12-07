@@ -187,7 +187,18 @@ def update_table(dropdown_filter):
     filtered_df.drop(columns=['_id'], inplace=True)
     # return filtered dataframe to data property of DataTable
     return filtered_df.to_dict('records'), [0]
-# TODO callback to highlight selected row in data table
+# callback to highlight selected row in data table
+@app.callback(
+    Output('shelter-table', 'style_data_conditional'),
+    Input('shelter-table', 'selected_rows')
+)
+def highlight_selected_row(selected_rows):
+    return [{
+        'if' : {'row_index': selected_rows},
+        'backgroundColor': '#2c3e50',
+        'color': 'white'
+    }]
+
 # callback to display breed percentages in pie chart
 @app.callback(
     Output('pie-chart', 'figure'),
