@@ -413,9 +413,8 @@ Bootstrap spacing utilities (margin and padding):
 ### Active/Selected States
 
 **Selected Table Row:**
-- Background: `#e3f2fd` (light blue)
-- Border: `1px solid #90caf9` (medium blue)
-- Note: This is planned enhancement, not yet implemented
+- Background: `#2c3e50` (dark slate)
+- Color: white
 
 **Active Filter:**
 - Dropdown displays selected value
