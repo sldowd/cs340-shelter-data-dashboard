@@ -135,9 +135,33 @@ app.layout = dbc.Container([
     html.Br(),
     # container for graph and map -- wrapped in a row for optimized layout
     dbc.Container([
+        dbc.Card(
+            dbc.CardBody([
+                dcc.Dropdown(
+                    ['Breed Distribution', 'Age Distribution'],
+                    id='chart-selector',
+                    value='Breed Distribution',
+                    style={'color': '#2c3e50'}
+                )
+            ],
+                style=
+                {
+                    'color': 'white',
+                    'backgroundColor': '#2c3e50',
+                    'borderRadius': '8px',
+                    'size' : '50%',
+                },
+                className='p-3'
+            )
+        ),
         dbc.Row([
             dbc.Col(
-                [dcc.Graph(id='pie-chart')], xs=12, md=6
+                [
+
+                    dcc.Graph(id='pie-chart'),
+                    #dcc.Graph(id='bar-chart')
+                ], xs=12, md=6,
+
             ),
             dbc.Col(
                 [html.H5('Selected Animal Location', className='mb-2'),
@@ -202,9 +226,10 @@ def highlight_selected_row(selected_rows):
 # callback to display breed percentages in pie chart
 @app.callback(
     Output('pie-chart', 'figure'),
-    [Input('shelter-table', 'derived_virtual_data')]
+   [ Input('shelter-table', 'derived_virtual_data'),
+     Input('chart-selector', 'value')]
 )
-def update_pie_chart(viewData):
+def update_pie_chart(viewData, chart_selector):
     if viewData is None:
         return {}
 
@@ -212,6 +237,7 @@ def update_pie_chart(viewData):
     pie_df = pd.DataFrame.from_records(viewData)
     if pie_df.empty:
         return {}
+
     # filter to display top 8 breeds -- otherwise full df pie chart looks like nonsense
     top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
     top_breeds.columns = ['breed', 'count']
@@ -236,8 +262,18 @@ def update_pie_chart(viewData):
         font={'family' : 'ubuntu'},
         title_font={'size' : 22}
     )
-    return fig
+    breed_age_df = pie_df['breed'].value_counts().head(8).reset_index()
+    breed_age_df.columns = ['breed', 'age_upon_outcome']
+    fig_bar = px.bar(
+        breed_age_df, x='breed', y='age_upon_outcome' )
+    if chart_selector == 'Age Distribution':
+        return fig_bar
+    elif chart_selector == 'Breed Distribution':
+        return fig
+    else:
+        return fig
 
+# callback to populate map
 @app.callback(
     Output('map-div', "children"),
     [Input('shelter-table', "derived_virtual_data"),
