@@ -135,33 +135,46 @@ app.layout = dbc.Container([
     html.Br(),
     # container for graph and map -- wrapped in a row for optimized layout
     dbc.Container([
-        dbc.Card(
-            dbc.CardBody([
-                dcc.Dropdown(
-                    ['Breed Distribution', 'Age Distribution'],
-                    id='chart-selector',
-                    value='Breed Distribution',
-                    style={'color': '#2c3e50'}
-                )
-            ],
-                style=
-                {
-                    'color': 'white',
-                    'backgroundColor': '#2c3e50',
-                    'borderRadius': '8px',
-                    'size' : '50%',
-                },
-                className='p-3'
-            )
-        ),
+        # dbc.Card(
+        #     dbc.CardBody([
+        #         dcc.Dropdown(
+        #             ['Breed Distribution', 'Age Distribution'],
+        #             id='chart-selector',
+        #             value='Breed Distribution',
+        #             style={'color': '#2c3e50'}
+        #         )
+        #     ],
+        #         style=
+        #         {
+        #             'color': 'white',
+        #             'backgroundColor': '#2c3e50',
+        #             'borderRadius': '8px',
+        #             'size' : '50%',
+        #         },
+        #         className='p-3'
+        #     )
+        # ),
         dbc.Row([
             dbc.Col(
                 [
-
-                    dcc.Graph(id='pie-chart'),
-                    #dcc.Graph(id='bar-chart')
-                ], xs=12, md=6,
-
+                    dbc.Card(
+                        dbc.CardBody([
+                            dcc.Dropdown(
+                            ['Breed Distribution', 'Age Distribution'],
+                            id='chart-selector',
+                            value='Breed Distribution',
+                            style={'color': '#2c3e50'})
+                        ], style=
+                            {
+                                'color': 'white',
+                                'backgroundColor': '#2c3e50',
+                                'borderRadius': '8px',
+                                'size' : '50%',
+                            },
+                            className='p-3')
+                    ),
+                    dcc.Graph(id='pie-chart')
+                ], xs=12, md=6
             ),
             dbc.Col(
                 [html.H5('Selected Animal Location', className='mb-2'),
@@ -170,8 +183,6 @@ app.layout = dbc.Container([
             )
         ])
     ], fluid=True),
-    html.Br(),
-    html.Br(),
 
 ], fluid='true', className='p-4', style={'backgroundColor': '#F2E6E3'})
 
@@ -262,10 +273,42 @@ def update_pie_chart(viewData, chart_selector):
         font={'family' : 'ubuntu'},
         title_font={'size' : 22}
     )
-    breed_age_df = pie_df['breed'].value_counts().head(8).reset_index()
-    breed_age_df.columns = ['breed', 'age_upon_outcome']
-    fig_bar = px.bar(
-        breed_age_df, x='breed', y='age_upon_outcome' )
+
+    # convert age in weeks to age in years using float division for precision
+    pie_df['age_years'] = pie_df['age_upon_outcome_in_weeks'] / 52
+    # define age bins & labels to group dogs by age range
+    bins = [0, 0.5, 1, 2, 3, 4, 5, 6, 100]
+    labels = ['<6 months', '6-12 months', '1-2 years', '2-3 years', '3-4 years','4-5 years', '5-6 years', '6+ years']
+    # categorize each animal into age group by age in years (converts age_years to age_group)
+    pie_df['age_group'] = pd.cut(pie_df['age_years'], bins=bins, labels=labels, right=False)
+    # count animals in each age group, sort by index instead of count, create age distribution data frame
+    age_distribution = pie_df['age_group'].value_counts().sort_index().reset_index()
+    # explicitly rename data frame columns
+    age_distribution.columns = ['age_group', 'count']
+
+    # define bar chart to display animal counts grouped by age
+    fig_bar = px.bar(age_distribution,
+                     x='age_group',
+                     y='count',
+                     title='Age Distribution',
+                     labels={'age_group': 'Age Group', 'count': 'Number of Dogs'},
+                     color='age_group',
+                     color_discrete_sequence=px.colors.sequential.RdBu,
+                     )
+    # style bars - hover & appearance
+    fig_bar.update_traces(
+        hovertemplate='<b>%{x}</b><br>Animals: %{y}<extra></extra>',
+        marker=dict(line=dict(color='white', width=2))
+    )
+    # style background color, text
+    fig_bar.update_layout(
+        paper_bgcolor='#F2E6E3',
+        plot_bgcolor='#2c3e50',
+        font={'family': 'ubuntu'},
+        title_font={'size': 22},
+        showlegend=False
+    )
+    # conditional to return fig based on drop down selection
     if chart_selector == 'Age Distribution':
         return fig_bar
     elif chart_selector == 'Breed Distribution':
