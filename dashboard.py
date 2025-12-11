@@ -135,25 +135,6 @@ app.layout = dbc.Container([
     html.Br(),
     # container for graph and map -- wrapped in a row for optimized layout
     dbc.Container([
-        # dbc.Card(
-        #     dbc.CardBody([
-        #         dcc.Dropdown(
-        #             ['Breed Distribution', 'Age Distribution'],
-        #             id='chart-selector',
-        #             value='Breed Distribution',
-        #             style={'color': '#2c3e50'}
-        #         )
-        #     ],
-        #         style=
-        #         {
-        #             'color': 'white',
-        #             'backgroundColor': '#2c3e50',
-        #             'borderRadius': '8px',
-        #             'size' : '50%',
-        #         },
-        #         className='p-3'
-        #     )
-        # ),
         dbc.Row([
             dbc.Col(
                 [
@@ -173,7 +154,10 @@ app.layout = dbc.Container([
                             },
                             className='p-3')
                     ),
-                    dcc.Graph(id='pie-chart')
+                    dcc.Graph(
+                        id='pie-chart',
+                        style={'height' : '500px'}
+                    )
                 ], xs=12, md=6
             ),
             dbc.Col(
@@ -244,77 +228,78 @@ def update_pie_chart(viewData, chart_selector):
     if viewData is None:
         return {}
 
-    # pie dataframe from shelter-table data
+    # define dataframe from shelter-table data
     pie_df = pd.DataFrame.from_records(viewData)
     if pie_df.empty:
         return {}
+    if chart_selector == 'Breed Distribution':
+        # filter to display top 8 breeds -- otherwise full df pie chart looks like nonsense
+        top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
+        top_breeds.columns = ['breed', 'count']
+        # construct pie chart with plotly express
+        fig = px.pie(
+            top_breeds,
+            names='breed',
+            values='count',
+            title='Breed Distribution',
+            color_discrete_sequence=px.colors.sequential.RdBu
+        )
+        # customize with update_traces method
+        fig.update_traces(
+            hovertemplate='<b>%{label}</b><br>Dogs Available: %{value}<br>Percentage: %{percent}<extra></extra>',
+            textposition='inside',
+            textinfo='percent',
+            marker=dict(line=dict(color='white', width=2))
+        )
+        # match style of page with update_layout method
+        fig.update_layout(
+            paper_bgcolor='#F2E6E3',
+            font={'family' : 'ubuntu'},
+            title_font={'size' : 22}
+        )
+        # return breed distribution pie chart
+        return fig
 
-    # filter to display top 8 breeds -- otherwise full df pie chart looks like nonsense
-    top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
-    top_breeds.columns = ['breed', 'count']
-    # construct pie chart with plotly express
-    fig = px.pie(
-        top_breeds,
-        names='breed',
-        values='count',
-        title='Breed Distribution',
-        color_discrete_sequence=px.colors.sequential.RdBu
-    )
-    # customize with update_traces method
-    fig.update_traces(
-        hovertemplate='<b>%{label}</b><br>Dogs Available: %{value}<br>Percentage: %{percent}<extra></extra>',
-        textposition='inside',
-        textinfo='percent',
-        marker=dict(line=dict(color='white', width=2))
-    )
-    # match style of page with update_layout method
-    fig.update_layout(
-        paper_bgcolor='#F2E6E3',
-        font={'family' : 'ubuntu'},
-        title_font={'size' : 22}
-    )
-
-    # convert age in weeks to age in years using float division for precision
-    pie_df['age_years'] = pie_df['age_upon_outcome_in_weeks'] / 52
-    # define age bins & labels to group dogs by age range
-    bins = [0, 0.5, 1, 2, 3, 4, 5, 6, 100]
-    labels = ['<6 months', '6-12 months', '1-2 years', '2-3 years', '3-4 years','4-5 years', '5-6 years', '6+ years']
-    # categorize each animal into age group by age in years (converts age_years to age_group)
-    pie_df['age_group'] = pd.cut(pie_df['age_years'], bins=bins, labels=labels, right=False)
-    # count animals in each age group, sort by index instead of count, create age distribution data frame
-    age_distribution = pie_df['age_group'].value_counts().sort_index().reset_index()
-    # explicitly rename data frame columns
-    age_distribution.columns = ['age_group', 'count']
-
-    # define bar chart to display animal counts grouped by age
-    fig_bar = px.bar(age_distribution,
-                     x='age_group',
-                     y='count',
-                     title='Age Distribution',
-                     labels={'age_group': 'Age Group', 'count': 'Number of Dogs'},
-                     color='age_group',
-                     color_discrete_sequence=px.colors.sequential.RdBu,
-                     )
-    # style bars - hover & appearance
-    fig_bar.update_traces(
-        hovertemplate='<b>%{x}</b><br>Animals: %{y}<extra></extra>',
-        marker=dict(line=dict(color='white', width=2))
-    )
-    # style background color, text
-    fig_bar.update_layout(
-        paper_bgcolor='#F2E6E3',
-        plot_bgcolor='#2c3e50',
-        font={'family': 'ubuntu'},
-        title_font={'size': 22},
-        showlegend=False
-    )
-    # conditional to return fig based on drop down selection
     if chart_selector == 'Age Distribution':
+        # convert age in weeks to age in years using float division for precision
+        pie_df['age_years'] = pie_df['age_upon_outcome_in_weeks'] / 52
+        # define age bins & labels to group dogs by age range
+        bins = [0, 0.5, 1, 2, 3, 4, 5, 6, 100]
+        labels = ['<6 months', '6-12 months', '1-2 years', '2-3 years', '3-4 years','4-5 years', '5-6 years', '6+ years']
+        # categorize each animal into age group by age in years (converts age_years to age_group)
+        pie_df['age_group'] = pd.cut(pie_df['age_years'], bins=bins, labels=labels, right=False)
+        # count animals in each age group, sort by index instead of count, create age distribution data frame
+        age_distribution = pie_df['age_group'].value_counts().sort_index().reset_index()
+        # explicitly rename data frame columns
+        age_distribution.columns = ['age_group', 'count']
+
+        # define bar chart to display animal counts grouped by age
+        fig_bar = px.bar(age_distribution,
+                         x='age_group',
+                         y='count',
+                         title='Age Distribution',
+                         labels={'age_group': 'Age Group', 'count': 'Number of Dogs'},
+                         color='age_group',
+                         color_discrete_sequence=px.colors.sequential.RdBu,
+                         )
+        # style bars - hover & appearance
+        fig_bar.update_traces(
+            hovertemplate='<b>%{x}</b><br>Animals: %{y}<extra></extra>',
+            marker=dict(line=dict(color='white', width=2))
+        )
+        # style background color, text
+        fig_bar.update_layout(
+            paper_bgcolor='#F2E6E3',
+            plot_bgcolor='#2c3e50',
+            font={'family': 'ubuntu'},
+            title_font={'size': 22},
+            showlegend=False
+        )
+        # return age distribution bar chart
         return fig_bar
-    elif chart_selector == 'Breed Distribution':
-        return fig
+
     else:
-        return fig
+        return {}
 
 # callback to populate map
 @app.callback(
