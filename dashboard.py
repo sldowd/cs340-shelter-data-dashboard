@@ -1,4 +1,9 @@
-
+"""
+Grazioso Salvare Dashboard
+Interactive web application for filtering and visualizing rescue dog candidates
+from Austin Animal Center shelter data.
+Last Updated: 12 December 2025
+"""
 
 from dash import Dash, html, Input, Output, dcc, dash_table, State
 import dash_bootstrap_components as dbc
@@ -7,24 +12,14 @@ import pandas as pd
 import dash_leaflet as dl
 import base64
 
-import importlib
-import animal_shelter
-
-# Reload the module
-importlib.reload(animal_shelter)
 # import controller
 from animal_shelter import AnimalShelter
 
-# connect to database
+
 db = AnimalShelter()
-
-# import dataset as dataframe using pandas
 df = pd.DataFrame.from_records(db.read({}))
-
-# drop mongoDB objectId from each doc
 df.drop(columns=['_id'], inplace=True)
 
-# initialize dash app
 app = Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
 
 # encode logo to base64 string
@@ -59,7 +54,8 @@ app.layout = dbc.Container([
                         html.Strong("Mountain/Wilderness Rescue"), ", or ",
                         html.Strong("Disaster/Individual Tracking"), ". ",
                         html.Br(),
-                        "Each rescue type has preferred breed, age, and sex criteria optimized for training success.",
+                        "Each rescue type has preferred breed, age, and sex criteria"
+                        "optimized for training success.",
                     ], className='card-text mb-3'),
                     html.P("This dashboard was built by Sarah Dowd 💾",
                        className='text-muted small')
@@ -67,12 +63,11 @@ app.layout = dbc.Container([
             ], className='mb-4 d-flex align-items-center'),
         ])
     ], style={ 'backgroundColor' : '#faf8f5' }, className='shadow-sm mb-4 m-5'),
-    # container for DataTable
     dbc.Container([
         dbc.Card([
            dbc.CardBody([
                dbc.Row([
-                   dbc.Col(html.H5('Filter by Rescue Type', className='card-title')),
+                   dbc.Col(html.H5('Filter by Rescue Type', className='card-title mb-0')),
                    dbc.Col(
                        dbc.Button(
                            "Export to CSV",
@@ -85,7 +80,7 @@ app.layout = dbc.Container([
                        ), width='auto'
                    )
                ], justify='between', align='center', class_name='mb-3'),
-                # dropdown menu with rescue options to filter data displayed in table, placeholder text instructs user
+                # dropdown menu with rescue type filters requested by client
                 dcc.Dropdown(['Water Rescue', 'Mountain Rescue', 'Disaster Rescue', 'Reset'],
                             placeholder='Select Rescue Type', id='dropdown-filter',
                              style=
@@ -98,7 +93,7 @@ app.layout = dbc.Container([
                 className='p-3'),
                 dcc.Download(id='download-dataframe-csv')
         ]),
-        # data table built from data from database--selectable rows, native pagination, 10 rows per page
+        # data table displays shelter data--selectable rows, native pagination, 10 rows per page
         # cells left-aligned with max width, table scrolls horizontally, sorting enabled
         dash_table.DataTable(data=df.to_dict('records'),
                             columns=[
@@ -147,7 +142,6 @@ app.layout = dbc.Container([
                             ),
     ]),
     html.Br(),
-    # container for graph and map -- wrapped in a row for optimized layout
     dbc.Container([
         dbc.Row([
             dbc.Col(
@@ -169,7 +163,7 @@ app.layout = dbc.Container([
                             className='p-3')
                     ),
                     dcc.Graph(
-                        id='pie-chart',
+                        id='chart-holder',
                         style={'height' : '500px'}
                     )
                 ], xs=12, md=6
@@ -220,6 +214,7 @@ def update_table(dropdown_filter):
     filtered_df.drop(columns=['_id'], inplace=True)
     # return filtered dataframe to data property of DataTable
     return filtered_df.to_dict('records'), [0]
+
 # callback to highlight selected row in data table
 @app.callback(
     Output('shelter-table', 'style_data_conditional'),
@@ -234,7 +229,7 @@ def highlight_selected_row(selected_rows):
 
 # callback to display breed percentages in pie chart
 @app.callback(
-    Output('pie-chart', 'figure'),
+    Output('chart-holder', 'figure'),
    [ Input('shelter-table', 'derived_virtual_data'),
      Input('chart-selector', 'value')]
 )
@@ -243,12 +238,12 @@ def update_pie_chart(viewData, chart_selector):
         return {}
 
     # define dataframe from shelter-table data
-    pie_df = pd.DataFrame.from_records(viewData)
-    if pie_df.empty:
+    chart_df = pd.DataFrame.from_records(viewData)
+    if chart_df.empty:
         return {}
     if chart_selector == 'Breed Distribution':
         # filter to display top 8 breeds -- otherwise full df pie chart looks like nonsense
-        top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
+        top_breeds = chart_df['breed'].value_counts().head(8).reset_index()
         top_breeds.columns = ['breed', 'count']
         # construct pie chart with plotly express
         fig = px.pie(
@@ -276,14 +271,14 @@ def update_pie_chart(viewData, chart_selector):
 
     if chart_selector == 'Age Distribution':
         # convert age in weeks to age in years using float division for precision
-        pie_df['age_years'] = pie_df['age_upon_outcome_in_weeks'] / 52
+        chart_df['age_years'] = chart_df['age_upon_outcome_in_weeks'] / 52
         # define age bins & labels to group dogs by age range
         bins = [0, 0.5, 1, 2, 3, 4, 5, 6, 100]
         labels = ['<6 months', '6-12 months', '1-2 years', '2-3 years', '3-4 years','4-5 years', '5-6 years', '6+ years']
         # categorize each animal into age group by age in years (converts age_years to age_group)
-        pie_df['age_group'] = pd.cut(pie_df['age_years'], bins=bins, labels=labels, right=False)
+        chart_df['age_group'] = pd.cut(chart_df['age_years'], bins=bins, labels=labels, right=False)
         # count animals in each age group, sort by index instead of count, create age distribution data frame
-        age_distribution = pie_df['age_group'].value_counts().sort_index().reset_index()
+        age_distribution = chart_df['age_group'].value_counts().sort_index().reset_index()
         # explicitly rename data frame columns
         age_distribution.columns = ['age_group', 'count']
 
@@ -325,15 +320,11 @@ def update_map(viewData, index):
         return None
     elif index is None:
         return None
-
     dff = pd.DataFrame.from_dict(viewData)
-    # Because we only allow single row selection, the list can be converted to a row index here
     if index is None:
         row = 0
     else:
         row = index[0]
-
-    # Austin TX is at [30.75,-97.48]
     return [
         dl.Map(style={'width': '100%', 'height': '500px'},
                center=[dff.iloc[row, 13], dff.iloc[row, 14]], # changed map center from Austin to selected row loc
@@ -353,6 +344,9 @@ def update_map(viewData, index):
         ])
     ]
 
+# callback to export data displayed in data table to csv
+# custom button and callback chosen instead of DataTable's built in export_format prop
+# to maintain consistent styling and button placement within the card layout
 @app.callback(Output('download-dataframe-csv', 'data'),
             Input('export-button', 'n_clicks'),
             State('shelter-table', 'derived_virtual_data'),
