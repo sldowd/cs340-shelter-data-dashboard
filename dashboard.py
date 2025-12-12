@@ -1,6 +1,6 @@
 
 
-from dash import Dash, html, Input, Output, dcc, dash_table
+from dash import Dash, html, Input, Output, dcc, dash_table, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -69,10 +69,22 @@ app.layout = dbc.Container([
     ], style={ 'backgroundColor' : '#faf8f5' }, className='shadow-sm mb-4 m-5'),
     # container for DataTable
     dbc.Container([
-        html.H3('Shelter Data'),
         dbc.Card([
            dbc.CardBody([
-               html.H5('Filter by Rescue Type', className='card-title'),
+               dbc.Row([
+                   dbc.Col(html.H5('Filter by Rescue Type', className='card-title')),
+                   dbc.Col(
+                       dbc.Button(
+                           "Export to CSV",
+                           id='export-button',
+                           n_clicks=0,
+                           class_name='me-1',
+                           outline=True,
+                           size='sm',
+                           color='light',
+                       ), width='auto'
+                   )
+               ], justify='between', align='center', class_name='mb-3'),
                 # dropdown menu with rescue options to filter data displayed in table, placeholder text instructs user
                 dcc.Dropdown(['Water Rescue', 'Mountain Rescue', 'Disaster Rescue', 'Reset'],
                             placeholder='Select Rescue Type', id='dropdown-filter',
@@ -84,6 +96,7 @@ app.layout = dbc.Container([
                     'backgroundColor': '#2c3e50',
                      'borderRadius': '8px'},
                 className='p-3'),
+                dcc.Download(id='download-dataframe-csv')
         ]),
         # data table built from data from database--selectable rows, native pagination, 10 rows per page
         # cells left-aligned with max width, table scrolls horizontally, sorting enabled
@@ -130,7 +143,8 @@ app.layout = dbc.Container([
                                         'selector': 'input[type="radio"]:checked',
                                         'rule': 'accent-color: #c9341b;'
                                     }],
-                            selected_rows=[0]),
+                            selected_rows=[0]
+                            ),
     ]),
     html.Br(),
     # container for graph and map -- wrapped in a row for optimized layout
@@ -338,6 +352,15 @@ def update_map(viewData, index):
             ])
         ])
     ]
+
+@app.callback(Output('download-dataframe-csv', 'data'),
+            Input('export-button', 'n_clicks'),
+            State('shelter-table', 'derived_virtual_data'),
+              prevent_initial_call=True)
+def export_to_csv(n_clicks, viewData):
+    dff = pd.DataFrame.from_dict(viewData)
+    return dcc.send_data_frame(dff.to_csv,'shelter_data.csv',index=False)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
