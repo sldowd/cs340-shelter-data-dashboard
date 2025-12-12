@@ -18,7 +18,7 @@ This application provides a comprehensive dashboard interface for Grazioso Salva
 - **Data Processing:** Pandas, NumPy
 - **Visualization:** Plotly Express, Dash Leaflet
 - **Database Driver:** PyMongo
-- **Styling:** Bootstrap (UNITED theme), Custom CSS
+- **Styling:** Bootstrap (UNITED theme)
 
 ## Architecture
 
@@ -109,10 +109,11 @@ Custom Python class providing full database operations:
 - Real-time table updates on filter selection
 - Automatic first-row selection after filtering
 
-**Breed Distribution Chart**
-- Interactive pie chart showing top 8 breeds in filtered dataset
-- Custom hover tooltips with dog count and percentage
-- Slice labels display percentages
+**Visualization Charts**
+- Dropdown selector to choose between two chart types:
+  - **Breed Distribution:** Interactive pie chart showing top 8 breeds in filtered dataset
+  - **Age Distribution:** Bar chart showing animals grouped by age ranges
+- Custom hover tooltips with detailed data
 - White borders for visual clarity
 - Responsive to filter changes
 
@@ -123,6 +124,13 @@ Custom Python class providing full database operations:
 - Popup shows animal name on click
 - Zoom level 10 for neighborhood-scale view
 - Dynamic centering based on selected record
+
+**CSV Export**
+- Custom "Export to CSV" button in filter card
+- Exports currently filtered/viewed table data
+- Maintains data integrity with proper index handling
+- Downloads as `shelter_data.csv`
+- Implemented via custom callback for consistent styling (vs built-in DataTable export)
 
 ### Query Implementation
 
@@ -154,8 +162,6 @@ GraziosoSilvare/
 ├── animal_shelter.py                  # CRUD module for MongoDB operations
 ├── dashboard.py                       # Main dashboard application
 ├── Grazioso Salvare Logo.png          # Brand logo image
-├── assets/                            # Optional: Custom CSS/JS
-│   └── custom.css                     # Dashboard styling overrides
 ├── screenshots/                       # Dashboard screenshots for documentation
 │   ├── dashboard-preview.png
 │   ├── water-rescue-filter.png
@@ -223,8 +229,8 @@ pip install -r requirements.txt
 
 **Required packages:**
 ```
-dash==2.14.2
-dash-bootstrap-components==1.5.0
+dash==2.18.2
+dash-bootstrap-components==1.6.0
 dash-leaflet==1.0.14
 plotly==5.18.0
 pandas==2.1.3
@@ -360,11 +366,11 @@ Select "Reset" from filter dropdown to return to unfiltered view of all 10,000+ 
 - [x] Custom styling with Bootstrap UNITED theme
 - [x] Professional color palette and typography
 - [x] Mobile-responsive grid layout
+- [x] Row highlighting for selected table records
+- [x] Additional chart types (bar chart for age distribution)
+- [x] Export filtered results to CSV
 
 ### 🔄 In Progress
-- [ ] Row highlighting for selected table records
-- [ ] Additional chart types (bar chart for age distribution)
-- [ ] Export filtered results to CSV
 - [ ] Custom map markers with brand colors
 
 ### 📋 Planned Enhancements
@@ -478,7 +484,7 @@ top_breeds = pie_df['breed'].value_counts().head(8).reset_index()
 ### Challenge 3: Radio Button Styling
 **Problem:** Default radio buttons didn't match brand colors and were difficult to see.
 
-**Solution:** Applied CSS accent-color property to customize radio button color to brand red (#c9341b).
+**Solution:** Applied inline CSS accent-color property via DataTable's css parameter to customize radio button color to brand red (#c9341b).
 
 ### Challenge 4: Snake Case Column Headers
 **Problem:** Database field names like `age_upon_outcome_in_weeks` appeared as-is in table headers.
@@ -490,6 +496,22 @@ columns=[{
     'name': i.replace('_', ' ').title(),  # Display name
     'id': i                                 # Original field name
 } for i in df.columns]
+```
+### Challenge 5: Adding Chart Selection Without Breaking Layout
+**Problem:** Wanted to add age distribution chart but didn't want two separate graph areas taking up space.
+
+**Solution:** Implemented dropdown selector that toggles between chart types using the same graph container, with conditional rendering in the callback based on selector value.
+```python
+@app.callback(
+    Output('chart-holder', 'figure'),
+    [Input('shelter-table', 'derived_virtual_data'),
+     Input('chart-selector', 'value')]
+)
+def update_pie_chart(viewData, chart_selector):
+    if chart_selector == 'Breed Distribution':
+        # ... return pie chart
+    elif chart_selector == 'Age Distribution':
+        # ... return bar chart
 ```
 
 ## Performance Considerations

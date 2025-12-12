@@ -255,6 +255,39 @@ fig.update_layout(
 - White borders essential for distinguishing similar colors
 - Interactive hover provides detailed data
 
+### Bar Chart (Age Distribution)
+
+**Purpose:** Visualize age distribution of filtered animals
+```python
+fig_bar = px.bar(
+    age_distribution,
+    x='age_group',
+    y='count',
+    title='Age Distribution',
+    color_discrete_sequence=px.colors.sequential.RdBu
+)
+
+fig_bar.update_traces(
+    hovertemplate='<b>%{x}</b><br>Animals: %{y}<extra></extra>',
+    marker=dict(line=dict(color='white', width=2))
+)
+
+fig_bar.update_layout(
+    paper_bgcolor='#F2E6E3',
+    plot_bgcolor='#2c3e50',  # Dark background for contrast
+    font={'family': 'ubuntu'},
+    title_font={'size': 22},
+    showlegend=False
+)
+```
+
+**Styling Details:**
+- Background: Page background color (#F2E6E3)
+- Plot area: Dark slate background (#2c3e50) for high contrast
+- Bar borders: 2px white lines
+- Age bins: <6mo, 6-12mo, 1-2yr, 2-3yr, 3-4yr, 4-5yr, 5-6yr, 6+yr
+- No legend (color serves aesthetic purpose only)
+
 ### Geolocation Map
 
 **Purpose:** Show selected animal's shelter location
@@ -572,39 +605,6 @@ style_header={
     'fontWeight': 'bold'
 }
 ```
-
-### Custom CSS File (assets/custom.css)
-
-```css
-/* Radio button styling */
-input[type="radio"] {
-    accent-color: #c9341b;
-}
-
-/* Link hover effect */
-a:hover {
-    color: #a12816;
-    text-decoration: underline;
-}
-
-/* Card shadow on hover */
-.card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    transition: box-shadow 0.3s ease-in-out;
-}
-
-/* Smooth transitions */
-* {
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Focus outline */
-*:focus-visible {
-    outline: 2px solid #2c3e50;
-    outline-offset: 2px;
-}
-```
-
 ---
 
 ## Design System Maintenance

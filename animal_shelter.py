@@ -1,3 +1,9 @@
+"""
+Animal Shelter CRUD Module
+Provides Create, Read, Update, and Delete operations for MongoDB shelter database.
+Supports authentication via environment variables or direct credential passing.
+"""
+
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
@@ -34,7 +40,7 @@ class AnimalShelter:
             self.collection = self.database[COLLECTION]
         # exception handling for failed connection
         except Exception as e:
-            raise Exception(f"Connection to Mongodb failed: {e}")
+            raise Exception(f"Connection to MongoDB failed: {e}")
 
     # create method for data insertion
     def create(self, data):
@@ -89,7 +95,7 @@ class AnimalShelter:
             return 0
 
     # close method - manually closes db connection
-    # TODO: Refactor for automatic connection cleanup
+    # Optional: Refactor for automatic connection cleanup
     def close(self):
         try:
             self.client.close()
