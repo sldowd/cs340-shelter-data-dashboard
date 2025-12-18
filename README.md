@@ -11,6 +11,11 @@ This application provides a comprehensive dashboard interface for Grazioso Salva
 - Explore animal locations via geolocation mapping
 - Perform CRUD operations on the shelter database
 
+## Dashboard Demo
+
+[![Dashboard Demonstration](https://youtu.be/OsMyzGyEvUA)]
+https://youtu.be/OsMyzGyEvUA
+
 ## Tech Stack
 
 - **Backend:** Python 3.9+, MongoDB 5.0+
@@ -162,12 +167,6 @@ GraziosoSilvare/
 ├── animal_shelter.py                  # CRUD module for MongoDB operations
 ├── dashboard.py                       # Main dashboard application
 ├── Grazioso Salvare Logo.png          # Brand logo image
-├── screenshots/                       # Dashboard screenshots for documentation
-│   ├── dashboard-demo.mov
-│   ├── dashboard-preview.png
-│   ├── water-rescue-filter.png
-│   ├── mountain-rescue-filter.png
-│   └── disaster-rescue-filter.png
 ├── README.md                          # This file
 ├── STYLE_GUIDE.md                     # Frontend design documentation
 └── tests/
