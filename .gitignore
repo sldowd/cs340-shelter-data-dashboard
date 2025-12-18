@@ -7,4 +7,5 @@ __pycache__/
 .idea/
 *.log
 .DS_Store
-screenshots
+screenshots/*.png
+screenshots/*.mov
