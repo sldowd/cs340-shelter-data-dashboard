@@ -13,8 +13,7 @@ This application provides a comprehensive dashboard interface for Grazioso Salva
 
 ## Dashboard Demo
 
-[![Dashboard Demonstration] (https://youtu.be/OsMyzGyEvUA)]
-https://youtu.be/OsMyzGyEvUA
+[![Dashboard Demo](https://img.youtube.com/vi/OsMyzGyEvUA/0.jpg)](https://youtu.be/OsMyzGyEvUA)
 
 ## Tech Stack
 
