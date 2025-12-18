@@ -163,6 +163,7 @@ GraziosoSilvare/
 ├── dashboard.py                       # Main dashboard application
 ├── Grazioso Salvare Logo.png          # Brand logo image
 ├── screenshots/                       # Dashboard screenshots for documentation
+│   ├── dashboard-demo.mov
 │   ├── dashboard-preview.png
 │   ├── water-rescue-filter.png
 │   ├── mountain-rescue-filter.png

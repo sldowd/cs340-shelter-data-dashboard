@@ -27,7 +27,6 @@ binary_img = open('Grazioso Salvare Logo.png', 'rb').read()
 encoded_img = base64.b64encode(binary_img)
 
 app.layout = dbc.Container([
-    html.Center(html.B(html.H1('CS-340 Module 6 Dashboard'))),
     dbc.Card([
         dbc.CardBody([
             dbc.Row([
@@ -45,22 +44,24 @@ app.layout = dbc.Container([
                     ], href='https://www.snhu.edu', target='_blank')
                 ], xs=12, md=4, className='d-flex align-items-center justify-content-center'),
                 dbc.Col([
-                    html.H2('Welcome to the Grazioso Salvare Dashboard', className='card-title mb-3 mt-2'),
-                    html.P([
-                        "This dashboard helps identify rescue dog candidates from Austin-area animal shelters. "
-                        "Use the filters below to search for dogs matching specific rescue profiles: ",
-                        html.Br(),
-                        html.Strong("Water Rescue"), ", ",
-                        html.Strong("Mountain/Wilderness Rescue"), ", or ",
-                        html.Strong("Disaster/Individual Tracking"), ". ",
-                        html.Br(),
-                        "Each rescue type has preferred breed, age, and sex criteria"
-                        "optimized for training success.",
-                    ], className='card-text mb-3'),
-                    html.P("This dashboard was built by Sarah Dowd 💾",
-                       className='text-muted small')
-                ], xs=12, md=8, className='mb-4'),
-            ], className='mb-4 d-flex align-items-center'),
+                    html.Div([
+                        html.H2('Welcome to the Grazioso Salvare Dashboard', className='card-title mb-2 mt-2'),
+                        html.P([
+                            "This dashboard helps identify rescue dog candidates from Austin-area animal shelters. "
+                            "Use the filters below to search for dogs matching specific rescue profiles: ",
+                            html.Br(),
+                            html.Strong("Water Rescue"), ", ",
+                            html.Strong("Mountain/Wilderness Rescue"), ", or ",
+                            html.Strong("Disaster/Individual Tracking"), ". ",
+                            html.Br(),
+                            "Each rescue type has preferred breed, age, and sex criteria"
+                            " optimized for training success.",
+                        ], className='card-text mb-3', style={'font-size':'20px'}),
+                        html.P("This dashboard was built by Sarah Dowd 💾",
+                           className='text-muted small mb-0')
+                    ])
+                ], xs=12, md=8, className='mb-0'),
+            ], className='mb-4 d-flex align-items-center justify-content-center'),
         ])
     ], style={ 'backgroundColor' : '#faf8f5' }, className='shadow-sm mb-4 m-5'),
     dbc.Container([
